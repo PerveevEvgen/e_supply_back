@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.UUID;
 
 @Data
@@ -11,10 +12,10 @@ import java.util.UUID;
 public class ReportResponseDTO {
     private UUID itemId;
     private String itemName;
-    private  String individualNumber;
+    private String individualNumber;
     private String operationTypeName;
     private String fromUnitName;
     private String toUnitName;
-    private String operationDate;
-    private String documentName;
+    private Date operationDate;
+    private String documentLink;
 }

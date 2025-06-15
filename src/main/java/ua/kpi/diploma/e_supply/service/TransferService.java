@@ -1,4 +1,4 @@
-package ua.kpi.diploma.e_supply.service.impl;
+package ua.kpi.diploma.e_supply.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -7,7 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.kpi.diploma.e_supply.dto.ItemsDTO;
 import ua.kpi.diploma.e_supply.dto.transferDto.TransferRequestDTO;
 import ua.kpi.diploma.e_supply.entity.Documents;
-import ua.kpi.diploma.e_supply.entity.ItemMoveLogs;
 import ua.kpi.diploma.e_supply.entity.Items;
 import ua.kpi.diploma.e_supply.entity.dict_entities.DictItemStatuses;
 import ua.kpi.diploma.e_supply.entity.dict_entities.DictOperationTypes;
@@ -15,7 +14,6 @@ import ua.kpi.diploma.e_supply.entity.dict_entities.DictUnits;
 import ua.kpi.diploma.e_supply.repository.*;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +29,7 @@ public class TransferService {
     private final DictOperationTypesRepository dictOperationTypesRepository;
     private final DocumentsRepository documentsRepository;
     private final S3Util s3Util;
+    private final LoggerService loggerService;
 
     @Transactional
     public void transferItems(TransferRequestDTO request, MultipartFile file) {
@@ -54,7 +53,6 @@ public class TransferService {
         document.setLink(fileUrl);
         document = documentsRepository.save(document);
 
-             // Отримання всіх айтемів одним запитом
         List<Items> items = itemsRepository.findAllById(request.getItemIds());
 
         if (items.size() != request.getItemIds().size()) {
@@ -64,29 +62,31 @@ public class TransferService {
         List<ItemsDTO> result = new ArrayList<>();
 
         for (Items item : items) {
-            DictUnits fromUnit = item.getUnit(); // зберігаємо попередній підрозділ
+            DictUnits fromUnit = item.getUnit();
 
             item.setUnit(targetUnit);
             item.setStatus(transferredStatus);
             Items saved = itemsRepository.save(item);
 
-            createTransferLog(saved, fromUnit, targetUnit, document, transferOperation);
+            loggerService.logMovement(saved, fromUnit, targetUnit, document, transferOperation);
+//            createTransferLog(saved, fromUnit, targetUnit, document, transferOperation);
 
             result.add(toDTO(saved));
         }
 
     }
 
-    private void createTransferLog(Items item, DictUnits fromUnit, DictUnits toUnit, Documents document, DictOperationTypes operationType) {
-        ItemMoveLogs log = new ItemMoveLogs();
-        log.setItem(item);
-        log.setFromUnit(fromUnit);
-        log.setToUnit(toUnit);
-        log.setMoveDate(LocalDate.now());
-        log.setDocument(document);
-        log.setOperationType(operationType);
-        itemMoveLogsRepository.save(log);
-    }
+
+//    private void createTransferLog(Items item, DictUnits fromUnit, DictUnits toUnit, Documents document, DictOperationTypes operationType) {
+//        ItemMoveLogs log = new ItemMoveLogs();
+//        log.setItem(item);
+//        log.setFromUnit(fromUnit);
+//        log.setToUnit(toUnit);
+//        log.setMoveDate(LocalDate.now());
+//        log.setDocument(document);
+//        log.setOperationType(operationType);
+//        itemMoveLogsRepository.save(log);
+//    }
 
     private ItemsDTO toDTO(Items item) {
         return new ItemsDTO(

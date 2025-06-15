@@ -1,4 +1,4 @@
-package ua.kpi.diploma.e_supply.service.impl;
+package ua.kpi.diploma.e_supply.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class AcceptanceServiceImpl {
+public class AcceptanceService {
 
     private final ItemsRepository itemsRepository;
     private final DictItemCodesRepository typeCodeRepo;
@@ -31,8 +31,8 @@ public class AcceptanceServiceImpl {
 
     private final DocumentsRepository documentRepo;
     private final DictOperationTypesRepository operationTypeRepo;
-    private final ItemMoveLogsRepository logRepo;
     private final S3Util S3Util;
+    private final LoggerService loggerService;
 
     @Transactional
     public List<ItemsDTO> accept(List<ItemsRequestDTO> dtos, MultipartFile file) {
@@ -61,13 +61,12 @@ public class AcceptanceServiceImpl {
         List<ItemsDTO> result = new ArrayList<>();
 
         for (ItemsRequestDTO dto : dtos) {
-            // Витяг typeCode для кожного айтема
             DictItemTypes typeCode = typeCodeRepo.findById(dto.getTypeCodeId())
                     .orElseThrow(() -> new RuntimeException("Item type not found: " + dto.getTypeCodeId()));
 
 
             Items savedItem = createItem(dto, typeCode, toUnit, status);
-            createLog(savedItem, fromUnit, toUnit, document, operationType);
+            loggerService.logMovement(savedItem, fromUnit, toUnit, document, operationType);
 
             result.add(toDTO(savedItem));
         }
@@ -91,16 +90,16 @@ public class AcceptanceServiceImpl {
         return item;
     }
 
-    private void createLog(Items item, DictUnits fromUnit, DictUnits toUnit, Documents document, DictOperationTypes operationType) {
-        ItemMoveLogs log = new ItemMoveLogs();
-        log.setItem(item);
-        log.setFromUnit(fromUnit);
-        log.setToUnit(toUnit);
-        log.setMoveDate(LocalDate.now());
-        log.setDocument(document);
-        log.setOperationType(operationType);
-        logRepo.save(log);
-    }
+//    private void createLog(Items item, DictUnits fromUnit, DictUnits toUnit, Documents document, DictOperationTypes operationType) {
+//        ItemMoveLogs log = new ItemMoveLogs();
+//        log.setItem(item);
+//        log.setFromUnit(fromUnit);
+//        log.setToUnit(toUnit);
+//        log.setMoveDate(LocalDate.now());
+//        log.setDocument(document);
+//        log.setOperationType(operationType);
+//        logRepo.save(log);
+//    }
 
     public ItemsDTO update(UUID id, ItemsDTO dto) {
         Items item = itemsRepository.findById(id).orElseThrow();

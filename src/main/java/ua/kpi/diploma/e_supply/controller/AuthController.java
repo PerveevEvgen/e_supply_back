@@ -1,52 +1,33 @@
 package ua.kpi.diploma.e_supply.controller;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.bind.annotation.*;
 import ua.kpi.diploma.e_supply.dto.AuthDTO;
+import ua.kpi.diploma.e_supply.dto.LogoutRequestDTO;
+import ua.kpi.diploma.e_supply.dto.TokenRefreshRequestDTO;
+import ua.kpi.diploma.e_supply.service.AuthService;
 
-@Setter
 @RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Value("${client-id}")
-    private String clientId;
+    private final AuthService authService;
 
-    @Value("${resource-url}")
-    private String resourceServerUrl;
-
-    @Value("${grant-type}")
-    private String grantType;
-
-    @GetMapping("/api/auth")
-    public String auth(@RequestBody AuthDTO authDTO) {
-        var headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        var body = "client_id=" + clientId +
-                "&username=" + authDTO.login() +
-                "&password=" + authDTO.password() +
-                "&grant_type=" + grantType;
-
-        var requestEntity = new HttpEntity<>(body, headers);
-        var restTemplate = new RestTemplate();
-
-        var responce = restTemplate.exchange(
-                resourceServerUrl,
-                HttpMethod.POST,
-                requestEntity,
-                String.class
-        );
-        if (responce.getStatusCode().value() == 200) {
-            return responce.getBody();
-        }
-        return null;
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody AuthDTO authDTO) {
+        return authService.authenticate(authDTO);
     }
 
+    @PostMapping("/refresh-token")
+    public ResponseEntity<String> refreshToken(@RequestBody TokenRefreshRequestDTO tokenRefreshRequestDTO) {
+        return authService.refreshAccessToken(tokenRefreshRequestDTO);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody LogoutRequestDTO logoutRequestDTO) {
+        authService.logout(logoutRequestDTO);
+        return ResponseEntity.noContent().build();
+    }
 }

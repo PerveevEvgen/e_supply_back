@@ -1,4 +1,4 @@
-package ua.kpi.diploma.e_supply.service.impl;
+package ua.kpi.diploma.e_supply.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +29,7 @@ public class DisposalService {
     private final ItemMoveLogsRepository itemMoveLogsRepository;
     private final DictOperationTypesRepository dictOperationTypesRepository;
     private final S3Util S3Util;
+    private final LoggerService loggerService;
 
     @Transactional
     public List<ItemsDTO> disposeItems(DisposalRequestDTO request, MultipartFile file) {
@@ -54,8 +55,6 @@ public class DisposalService {
         document.setLink(fileUrl);
         document = documentRepo.save(document);
 
-
-        // Отримання всіх айтемів одним запитом
         List<Items> items = itemsRepository.findAllById(request.getItemIds());
 
         if (items.size() != request.getItemIds().size()) {
@@ -70,7 +69,7 @@ public class DisposalService {
             item.setUnit(toUnit);
             Items saved = itemsRepository.save(item);
 
-            createDisposalLog(saved, fromUnit, toUnit, document, operationType);
+            loggerService.logMovement(saved, fromUnit, toUnit, document, operationType);
 
             result.add(toDTO(saved));
         }
@@ -78,16 +77,16 @@ public class DisposalService {
         return result;
 
     }
-    private void createDisposalLog(Items item, DictUnits fromUnit, DictUnits toUnit, Documents document, DictOperationTypes operationType) {
-        ItemMoveLogs log = new ItemMoveLogs();
-        log.setItem(item);
-        log.setFromUnit(fromUnit);
-        log.setToUnit(toUnit);
-        log.setMoveDate(LocalDate.now());
-        log.setDocument(document);
-        log.setOperationType(operationType);
-        itemMoveLogsRepository.save(log);
-    }
+//    private void createDisposalLog(Items item, DictUnits fromUnit, DictUnits toUnit, Documents document, DictOperationTypes operationType) {
+//        ItemMoveLogs log = new ItemMoveLogs();
+//        log.setItem(item);
+//        log.setFromUnit(fromUnit);
+//        log.setToUnit(toUnit);
+//        log.setMoveDate(LocalDate.now());
+//        log.setDocument(document);
+//        log.setOperationType(operationType);
+//        itemMoveLogsRepository.save(log);
+//    }
     private ItemsDTO toDTO(Items item) {
         return new ItemsDTO(
                 item.getId(),

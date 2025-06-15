@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.kpi.diploma.e_supply.dto.ItemsDTO;
 import ua.kpi.diploma.e_supply.dto.ItemsDto.ItemsRequestDTO;
-import ua.kpi.diploma.e_supply.service.impl.AcceptanceServiceImpl;
+import ua.kpi.diploma.e_supply.service.AcceptanceService;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,7 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AcceptanceController {
 
-    private final AcceptanceServiceImpl service;
+    private final AcceptanceService service;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public List<ItemsDTO> create(@RequestPart("request") List<ItemsRequestDTO> dtos,

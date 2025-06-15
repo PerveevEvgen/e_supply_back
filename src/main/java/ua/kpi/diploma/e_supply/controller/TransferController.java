@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.kpi.diploma.e_supply.dto.ItemsDTO;
 import ua.kpi.diploma.e_supply.dto.transferDto.TransferRequestDTO;
-import ua.kpi.diploma.e_supply.service.impl.TransferService;
+import ua.kpi.diploma.e_supply.service.TransferService;
 import jakarta.validation.Valid;
 
 import java.util.List;

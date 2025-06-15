@@ -41,4 +41,6 @@ public class Users {
     @ManyToOne
     @JoinColumn(name = "role_id")
     private DictUserRoles role;
+
+    private String email;
 }

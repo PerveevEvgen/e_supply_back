@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.kpi.diploma.e_supply.dto.DisposalRequestDTO;
 import ua.kpi.diploma.e_supply.dto.ItemsDTO;
-import ua.kpi.diploma.e_supply.service.impl.DisposalService;
+import ua.kpi.diploma.e_supply.service.DisposalService;
 
 import java.util.List;
 

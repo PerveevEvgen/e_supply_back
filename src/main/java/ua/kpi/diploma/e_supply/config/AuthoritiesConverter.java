@@ -20,6 +20,7 @@ public class AuthoritiesConverter implements Converter<Jwt, Collection<GrantedAu
                     .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
         }
+        String email = source.getClaimAsString("email");
         return Collections.emptyList();
     }
 }

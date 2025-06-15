@@ -1,4 +1,4 @@
-package ua.kpi.diploma.e_supply.service.impl;
+package ua.kpi.diploma.e_supply.service.dictServices;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -7,7 +7,6 @@ import ua.kpi.diploma.e_supply.entity.dict_entities.DictItemTypes;
 import ua.kpi.diploma.e_supply.repository.DictItemCodesRepository;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
